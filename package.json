@@ -1,0 +1,78 @@
+{
+  "name": "yaml-enforce",
+  "version": "0.0.1",
+  "description": "Enforce a structure in your yaml files.",
+  "main": "dist/index.js",
+  "types": "./types/index.d.ts",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "prepare": "is-ci || husky install",
+    "build": "tsc && chmod +x dist/cli/index.js",
+    "test": "jest",
+    "test:unit": "jest test/index",
+    "test:cli": "npm run build && jest test/cli",
+    "clean": "del-cli dist docs types coverage",
+    "lint": "prettier -c '**/*'",
+    "prepublishOnly": "npm run clean && npm run lint && npm run build"
+  },
+  "dependencies": {
+    "chalk": "^4.1.1",
+    "ci-info": "^3.2.0",
+    "js-yaml": "^4.1.0",
+    "readline": "^1.3.0",
+    "strip-ansi": "^7.0.0",
+    "validate-structure": "^1.1.0",
+    "wcwidth": "^1.0.1",
+    "yargs": "^17.0.1"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^12.1.4",
+    "@commitlint/config-conventional": "^12.1.4",
+    "@semantic-release/changelog": "^5.0.1",
+    "@semantic-release/commit-analyzer": "^8.0.1",
+    "@semantic-release/git": "^9.0.0",
+    "@semantic-release/github": "^7.2.3",
+    "@semantic-release/npm": "^7.1.3",
+    "@semantic-release/release-notes-generator": "^9.0.2",
+    "@types/jest": "^26.0.23",
+    "@types/js-yaml": "^4.0.1",
+    "@types/wcwidth": "^1.0.0",
+    "codecov": "^3.8.2",
+    "del-cli": "^3.0.1",
+    "fast-check": "^2.14.0",
+    "husky": "^6.0.0",
+    "is-ci": "^3.0.0",
+    "jest": "^26.6.3",
+    "prettier": "2.3.0",
+    "semantic-release": "^17.4.3",
+    "ts-jest": "^26.5.6",
+    "typescript": "^4.2.4"
+  },
+  "engines": {
+    "node": ">= 14"
+  },
+  "keywords": [
+    "yaml",
+    "object",
+    "validate",
+    "enforce",
+    "structure"
+  ],
+  "files": [
+    "dist",
+    "types"
+  ],
+  "bin": {
+    "yaml-enforce": "./dist/cli/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thislooksfun/yaml-enforce.git"
+  },
+  "author": "thislooksfun <tlf@thislooks.fun> (https://thislooks.fun)",
+  "bugs": {
+    "url": "https://github.com/thislooksfun/yaml-enforce/issues"
+  },
+  "homepage": "https://github.com/thislooksfun/yaml-enforce#readme"
+}

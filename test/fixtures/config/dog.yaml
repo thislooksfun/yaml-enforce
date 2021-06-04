@@ -1,0 +1,4 @@
+name: Bernard
+images:
+  - url: http://example.com/dog.png
+    tile: repeat
