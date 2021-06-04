@@ -7,7 +7,7 @@ export type {
 } from "validate-structure";
 
 import type { Structure, TypeDefs, ValidationError } from "validate-structure";
-import { load as loadYaml } from "js-yaml";
+import { parseYaml, loadYaml } from "./yaml.js";
 import { validateStructure } from "validate-structure";
 import fs from "fs";
 import path from "path";
@@ -19,7 +19,8 @@ function structureFor(file: string): Structure | null {
     const structPath = path.join(dir, ".yamlstructure.yaml");
     if (fs.existsSync(structPath) && fs.statSync(structPath).isFile()) {
       const contents = fs.readFileSync(structPath, { encoding: "utf-8" });
-      const struct = loadYaml(contents);
+      const struct = parseYaml(contents);
+
       // TODO: Validate struct's structure
       return struct as Structure;
     }
