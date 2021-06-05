@@ -87,7 +87,7 @@ function processPath(p: string, forceRecursion: boolean = false): boolean {
     lastClearable = logger.log(`Validating file '${p}'`, { newline: false });
   }
 
-  const errors = validateFile(p, globalStruct);
+  const { errors } = validateFile(p, globalStruct);
 
   const errCount = errors.length;
   if (errCount === 0) return true;

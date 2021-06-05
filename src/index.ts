@@ -7,6 +7,7 @@ export type {
 } from "validate-structure";
 
 import type { Structure, TypeDefs, ValidationError } from "validate-structure";
+import type { RangeMap } from "./yaml.js";
 import { parseYaml, loadYaml } from "./yaml.js";
 import { validateStructure } from "validate-structure";
 import fs from "fs";
@@ -44,9 +45,10 @@ export function validateYaml(
   structure: Structure,
   strict?: boolean,
   customTypes?: TypeDefs
-): ValidationError[] {
-  const data = loadYaml(yaml);
-  return validateStructure(data, structure, strict, customTypes);
+): { errors: ValidationError[]; map: RangeMap } {
+  const { data, map: map } = loadYaml(yaml);
+  const errors = validateStructure(data, structure, strict, customTypes);
+  return { errors, map };
 }
 
 /**
@@ -65,19 +67,19 @@ export function validateFile(
   structure?: Structure | null,
   strict?: boolean,
   customTypes?: TypeDefs
-): ValidationError[] {
+): { errors: ValidationError[]; map?: RangeMap } {
   if (!fs.existsSync(filepath)) {
-    return [{ msg: "File does not exist", path: "", type: "meta" }];
+    return { errors: [{ msg: "File does not exist", path: "", type: "meta" }] };
   }
   if (!fs.statSync(filepath).isFile()) {
-    return [{ msg: "Not a file", path: "", type: "meta" }];
+    return { errors: [{ msg: "Not a file", path: "", type: "meta" }] };
   }
 
   if (!structure) {
     const struct = structureFor(filepath);
     if (!struct) {
       const msg = "Unable to determine expected structure for file";
-      return [{ msg, path: "", type: "meta" }];
+      return { errors: [{ msg, path: "", type: "meta" }] };
     }
     structure = struct;
   }
