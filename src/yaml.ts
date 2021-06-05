@@ -1,15 +1,24 @@
 export { parse as parseYaml } from "yaml";
 
 import type { Node, Document, Pair, Scalar, YAMLSeq } from "yaml";
-import { isPair, isSeq, LineCounter, parseDocument, visit } from "yaml";
+import {
+  isAlias,
+  isPair,
+  isScalar,
+  isSeq,
+  LineCounter,
+  parseDocument,
+  visit,
+} from "yaml";
 
 type Index = string | number;
-type Location = { line: number; col: number };
-type Range = { start: Location; end: Location };
-type RangeMap = {
+export type Location = { line: number; col: number };
+export type Range = { start: Location; end: Location };
+export type RangeMap = {
   valueRange: Range;
   keyRange?: Range;
   contents?: { [key in Index]: RangeMap };
+  references?: RangeMap;
 };
 
 type AnyNode = Node | Document<unknown> | Pair<unknown, unknown>;
@@ -48,68 +57,91 @@ function findInSeq(node: AnyNode, seq: YAMLSeq): number {
   return -1;
 }
 
+function mapNode(n: AnyNode, lc: LineCounter): RangeMap {
+  const map: RangeMap = { valueRange: rangeOf(n, lc)!.value };
+
+  const anchorMap: { [key: string]: AnyNode } = {};
+
+  visit(n, (key, node: any, path) => {
+    if (node.anchor) {
+      anchorMap[node.anchor] = node;
+    }
+
+    if (key === "key") return;
+
+    if (!(isAlias(node) || isScalar(node))) return;
+
+    let current = map;
+    const next = (key: Index, range: RangePair) => {
+      if (!current.contents) {
+        current.contents = {};
+      }
+
+      if (!(key in current.contents)) {
+        current.contents[key] = {
+          valueRange: range.value,
+          keyRange: range.key,
+        };
+      }
+
+      current = current.contents[key];
+    };
+
+    let inSeq = false;
+    // start at 1 because the first entry is always a document.
+    for (let i = 0; i < path.length; ++i) {
+      const el = path[i];
+
+      if (inSeq) {
+        inSeq = false;
+        const index = findInSeq(el, path[i - 1] as YAMLSeq);
+        const range = rangeOf(el, lc);
+        if (range) next(index, range);
+      }
+
+      if (isAlias(el)) {
+        console.log(":(");
+      } else if (isSeq(el)) {
+        inSeq = true;
+      } else if (isPair(el)) {
+        // Lots of assumptions on this line. There's a good chance this will
+        // need fixing.
+        const key = (el as Pair<Scalar, any>).key.value as Index;
+        const range = rangeOf(el, lc);
+        if (range) next(key, range);
+      }
+    }
+
+    if (inSeq) {
+      const index = findInSeq(node, path[path.length - 1] as YAMLSeq);
+      const range = rangeOf(node, lc);
+      if (range) next(index, range);
+    }
+
+    const range = rangeOf(node, lc);
+    if (range) current.valueRange = range.value;
+
+    if (isAlias(node)) {
+      const otherNode = anchorMap[node.source];
+      current.references = mapNode(otherNode, lc);
+      // We can't just assign `current = otherMap` because we want to mutate the
+      // underlying data structure.
+      // current.valueRange = otherMap.valueRange;
+      // current.keyRange = otherMap.keyRange;
+      // current.contents = otherMap.contents;
+    }
+  });
+
+  return map;
+}
+
 type LoadedYaml = { data: any; map: RangeMap };
 export function loadYaml(y: string): LoadedYaml {
   const lc = new LineCounter();
   const doc = parseDocument(y, { lineCounter: lc });
-  const map: RangeMap = { valueRange: rangeOf(doc, lc)!.value };
-
-  visit(doc, {
-    Scalar(key, node, path) {
-      if (key === "key") return;
-
-      let current = map;
-      const next = (key: Index, range: RangePair) => {
-        if (!current.contents) {
-          current.contents = {};
-        }
-
-        if (!(key in current.contents)) {
-          current.contents[key] = {
-            valueRange: range.value,
-            keyRange: range.key,
-          };
-        }
-
-        current = current.contents[key];
-      };
-
-      let inSeq = false;
-      // start at 1 because the first entry is always a document.
-      for (let i = 1; i < path.length; ++i) {
-        const el = path[i];
-
-        if (inSeq) {
-          inSeq = false;
-          const index = findInSeq(el, path[i - 1] as YAMLSeq);
-          const range = rangeOf(el, lc);
-          if (range) next(index, range);
-        }
-
-        if (isSeq(el)) {
-          inSeq = true;
-        } else if (isPair(el)) {
-          // Lots of assumptions on this line. There's a good chance this will
-          // need fixing.
-          const key = (el as Pair<Scalar, any>).key.value as Index;
-          const range = rangeOf(el, lc);
-          if (range) next(key, range);
-        }
-      }
-
-      if (inSeq) {
-        const index = findInSeq(node, path[path.length - 1] as YAMLSeq);
-        const range = rangeOf(node, lc);
-        if (range) next(index, range);
-      }
-
-      const range = rangeOf(node, lc);
-      if (range) current.valueRange = range.value;
-    },
-  });
 
   return {
     data: doc.toJS(),
-    map: map as RangeMap,
+    map: mapNode(doc, lc),
   };
 }
