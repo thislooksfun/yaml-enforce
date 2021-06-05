@@ -85,27 +85,3 @@ export function validateFile(
   const contents = fs.readFileSync(filepath, { encoding: "utf-8" });
   return validateYaml(contents, structure, strict, customTypes);
 }
-
-/**
- * Validate that an object meets the requirements of a structure.
- *
- * @param filepaths An array of file paths to validate.
- * @param structure The expected structure of `val`. If this is not given it
- * will search for a `.yamlstructure.yaml` file in any of the parent folders.
- * @param strict Whether or not extra keys should be treated as a failure.
- * @param customTypes Any custom types you want to refer to in `structure`.
- *
- * @returns An array where each item is the array of errors for the associated
- * file. This array is in the same order as the input filepaths.
- *
- * @throws If something went wrong preparing for the validation. For example, if
- * the file does not exist.
- */
-export function validateFiles(
-  filepaths: string[],
-  structure?: Structure | null,
-  strict?: boolean,
-  customTypes?: TypeDefs
-): ValidationError[][] {
-  return filepaths.map(fp => validateFile(fp, structure, strict, customTypes));
-}

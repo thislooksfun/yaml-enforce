@@ -3,7 +3,7 @@ import path from "path";
 
 const fixtureDir = path.resolve(__dirname, "./fixtures");
 
-import { validateYaml, validateFile, validateFiles } from "../src";
+import { validateYaml, validateFile } from "../src";
 
 describe("validateYaml()", () => {
   it("should correctly parse and validate yaml files", () => {
@@ -64,45 +64,5 @@ describe("validateFile()", () => {
     expect(
       validateFile(path.join(fixtureDir, "config/burrowing/meerkat.yaml"))
     ).toStrictEqual([]);
-  });
-});
-
-describe("validateFiles()", () => {
-  it("should validate multiple files at once", () => {
-    const files = [
-      path.join(fixtureDir, "config/cat.yaml"),
-      path.join(fixtureDir, "config/snake.invalid.yaml"),
-    ];
-
-    expect(validateFiles(files)).toStrictEqual([
-      [],
-      [
-        { msg: "missing key", path: "images[0].url" },
-        { msg: "extra key", path: "images[0].uri" },
-      ],
-    ]);
-  });
-
-  it("should use the same structure, if supplied", () => {
-    const struct = { name: "string", images: "string[]" };
-
-    const files = [
-      path.join(fixtureDir, "config/cat.yaml"),
-      path.join(fixtureDir, "config/snake.invalid.yaml"),
-    ];
-
-    expect(validateFiles(files, struct)).toStrictEqual([
-      [{ msg: "'[object Object]' is not a string", path: "images[0]" }],
-      [{ msg: "'[object Object]' is not a string", path: "images[0]" }],
-    ]);
-  });
-
-  it("should use the nearest .yamlstructure", () => {
-    const files = [
-      path.join(fixtureDir, "config/cat.yaml"),
-      path.join(fixtureDir, "config/greetings/english.yaml"),
-    ];
-
-    expect(validateFiles(files)).toStrictEqual([[], []]);
   });
 });
