@@ -4,6 +4,7 @@ import path from "path";
 
 const cwd = process.cwd();
 
+chalk.Level = 1;
 const errorPrefix = `[${chalk.red("error")}]`;
 
 describe("cli", () => {
