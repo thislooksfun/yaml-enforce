@@ -53,7 +53,7 @@ function findInSeq(node: AnyNode, seq: YAMLSeq): number {
     }
   }
 
-  // This should never happen, it's here to make TypeScript happy.
+  /* istanbul ignore next -- This is only here to make TypeScript happy. */
   return -1;
 }
 
