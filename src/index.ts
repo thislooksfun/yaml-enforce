@@ -7,7 +7,7 @@ export type {
 } from "validate-structure";
 
 import type { Structure, TypeDefs, ValidationError } from "validate-structure";
-import type { RangeMap } from "./yaml.js";
+import type { Location, RangeMap } from "./yaml.js";
 import { parseYaml, loadYaml } from "./yaml.js";
 import { validateStructure } from "validate-structure";
 import fs from "fs";
@@ -28,6 +28,31 @@ function structureFor(file: string): Structure | null {
   }
 
   return null;
+}
+
+/**
+ * Get the location of an error message in the source file.
+ *
+ * @param err The error to find the position of.
+ * @param map The RangeMap for the source file.
+ *
+ * @returns The Location of the error.
+ */
+export function filePosForErr(err: ValidationError, map: RangeMap): Location {
+  let range = map;
+
+  for (const key of err.path) {
+    if (!range.contents) break;
+    range = range.contents[key];
+  }
+
+  if (err.type === "key" && range.keyRange) {
+    return range.keyRange?.start;
+  } else if (err.type === "val-end") {
+    return range.valueRange.end;
+  } else {
+    return range.valueRange.start;
+  }
 }
 
 /**

@@ -37,8 +37,8 @@ describe("cli", () => {
     expect(() => run([filePath])).toThrow(
       [
         `${errorPrefix} Found 2 errors in file '${snakePath}':`,
-        `${errorPrefix}   missing key 'url' (images.0)`,
-        `${errorPrefix}   extra key (images.0.uri)`,
+        `${errorPrefix}   missing key 'url' (images.0) [L4:1]`,
+        `${errorPrefix}   extra key (images.0.uri) [L3:5]`,
         "",
       ].join("\n")
     );
@@ -48,8 +48,8 @@ describe("cli", () => {
     expect(() => run([configPath])).toThrow(
       [
         `${errorPrefix} Found 2 errors in file '${snakePath}':`,
-        `${errorPrefix}   missing key 'url' (images.0)`,
-        `${errorPrefix}   extra key (images.0.uri)`,
+        `${errorPrefix}   missing key 'url' (images.0) [L4:1]`,
+        `${errorPrefix}   extra key (images.0.uri) [L3:5]`,
         "",
       ].join("\n")
     );
@@ -64,10 +64,10 @@ describe("cli", () => {
     expect(() => run(["-r", configPath])).toThrow(
       [
         `${errorPrefix} Found 1 error in file '${spanishPath}':`,
-        `${errorPrefix}   missing key 'title'`,
+        `${errorPrefix}   missing key 'title' [L2:1]`,
         `${errorPrefix} Found 2 errors in file '${snakePath}':`,
-        `${errorPrefix}   missing key 'url' (images.0)`,
-        `${errorPrefix}   extra key (images.0.uri)`,
+        `${errorPrefix}   missing key 'url' (images.0) [L4:1]`,
+        `${errorPrefix}   extra key (images.0.uri) [L3:5]`,
         "",
       ].join("\n")
     );
@@ -84,7 +84,7 @@ describe("cli", () => {
     ).toThrow(
       [
         `${errorPrefix} Found 1 error in file '${snakePath}':`,
-        `${errorPrefix}   extra key (images)`,
+        `${errorPrefix}   extra key (images) [L2:1]`,
         "",
       ].join("\n")
     );

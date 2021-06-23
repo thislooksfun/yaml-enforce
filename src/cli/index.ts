@@ -4,7 +4,7 @@ import type { Clearable } from "./log.js";
 import type { Structure } from "validate-structure";
 import { createLogger } from "./log.js";
 import { isCI } from "ci-info";
-import { validateFile } from "../index.js";
+import { filePosForErr, validateFile } from "../index.js";
 import fs from "fs";
 import path from "path";
 import yargs from "yargs";
@@ -104,12 +104,10 @@ function processPath(p: string, forceRecursion: boolean = false): boolean {
     lastClearable = logger.log(`Validating file '${p}'`, { newline: false });
   }
 
-  const { errors } = validateFile(p, globalStruct);
+  const { errors, map } = validateFile(p, globalStruct);
 
   const errCount = errors.length;
   if (errCount === 0) return true;
-
-  // TODO: Better logging.
 
   clearLast();
   logger.error(
@@ -119,6 +117,10 @@ function processPath(p: string, forceRecursion: boolean = false): boolean {
     let msg = err.msg;
     if (err.path.length > 0) {
       msg += ` (${err.path.join(".")})`;
+    }
+    if (map) {
+      const pos = filePosForErr(err, map);
+      msg += ` [L${pos.line}:${pos.col}]`;
     }
     logger.error(msg, { prefix: "  " });
   }
