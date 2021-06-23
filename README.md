@@ -66,7 +66,7 @@
   >
 </p>
 
-Enforce a structure in your yaml files.
+Enforce a structure in your yaml (or json<sup>1</sup>) files.
 
 ## Installation
 
@@ -83,6 +83,13 @@ Note: Node 14+ is required.
 ## Contributing
 
 If you want to help out, please read the [CONTRIBUTING.md][c.md].
+
+---
+
+<sup>1</sup>Since yaml 1.2 is a superset of json,
+this package also works to validate json files out-of-the-box, though it is
+disabled in the cli by default to prevent accidentally trying to validate config
+files like package(-lock).json. Use the `--json` or `-j` flag to enable it.
 
 <!-- Links -->
 

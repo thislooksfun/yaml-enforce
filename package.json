@@ -54,6 +54,7 @@
   },
   "keywords": [
     "yaml",
+    "json",
     "object",
     "validate",
     "enforce",

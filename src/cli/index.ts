@@ -23,6 +23,16 @@ const args = yargs(process.argv.slice(2))
     desc: "A json string containing the structure to check against.",
     type: "string",
   })
+  .option("j", {
+    alias: "json",
+    desc: "Check files ending in .json. If you want to check both .json and .yaml files you must also specify --yaml.",
+    type: "string",
+  })
+  .option("y", {
+    alias: "yaml",
+    desc: "Check files ending in .yaml/.yml. This is on by default.",
+    type: "string",
+  })
   .option("verbose", {
     desc: "Show debug logs.",
     type: "boolean",
@@ -42,6 +52,13 @@ const logLevel = args.silent ? "silent" : args.verbose ? "debug" : "log";
 const logger = createLogger(logLevel);
 
 const globalStruct = args.s ? (JSON.parse(args.s) as Structure) : null;
+
+const checkJson = args.json;
+const checkYaml = !checkJson || args.yaml;
+const extensions = [
+  ...(checkJson ? [".json"] : []),
+  ...(checkYaml ? [".yaml", ".yml"] : []),
+];
 
 let lastClearable: Clearable = { clear: () => {} };
 const clearLast = () => {
@@ -73,7 +90,7 @@ function processPath(p: string, forceRecursion: boolean = false): boolean {
   }
 
   const { name, ext } = path.parse(p);
-  if (![".yaml", ".yml"].includes(ext)) {
+  if (!extensions.includes(ext)) {
     logger.debug(`Skipping file '${p}', invalid extension`);
     return true;
   }
