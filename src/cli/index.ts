@@ -130,5 +130,4 @@ if (args._.length > 0) {
 if (totalErrors === 0) {
   clearLast();
   logger.log("All yaml files matched the expected structure(s)!");
-} else {
 }
