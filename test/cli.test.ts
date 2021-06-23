@@ -87,6 +87,17 @@ describe("cli", () => {
     );
   });
 
+  it("should handle yaml aliases", () => {
+    const referencePath = cpath("complex/reference.invalid.yaml");
+    expect(() => run([referencePath])).toThrow(
+      [
+        `${errorPrefix} Found 1 error in file '${referencePath}':`,
+        `${errorPrefix}   'world' is not an integer (b.hello.there) [L4:4]`,
+        "",
+      ].join("\n")
+    );
+  });
+
   it("should exit cleanly if there were no errors", () => {
     const filePath = "test/fixtures/config/dog.yaml";
     expect(run([filePath])).toBe(

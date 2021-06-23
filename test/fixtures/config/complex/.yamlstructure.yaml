@@ -1,0 +1,6 @@
+a:
+  hello:
+    there: string
+b:
+  hello:
+    there: int
