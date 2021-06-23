@@ -15,8 +15,8 @@ describe("validateYaml()", () => {
         expect(
           validateYaml(`other: ${i}`, { key: "int" }).errors
         ).toStrictEqual([
-          { msg: "missing key 'key'", path: "", type: "val-end" },
-          { msg: "extra key", path: "other", type: "key" },
+          { msg: "missing key 'key'", path: [], type: "val-end" },
+          { msg: "extra key", path: ["other"], type: "key" },
         ]);
       })
     );
@@ -26,13 +26,13 @@ describe("validateYaml()", () => {
 describe("validateFile()", () => {
   it("should error if the file does not exist", () => {
     expect(validateFile("/some/fake/path", "").errors).toStrictEqual([
-      { msg: "File does not exist", path: "", type: "meta" },
+      { msg: "File does not exist", path: [], type: "meta" },
     ]);
   });
 
   it("should error if the path is not a file", () => {
     expect(validateFile("/").errors).toStrictEqual([
-      { msg: "Not a file", path: "", type: "meta" },
+      { msg: "Not a file", path: [], type: "meta" },
     ]);
   });
 
@@ -43,7 +43,7 @@ describe("validateFile()", () => {
     expect(validateFile(fpath, struct).errors).toStrictEqual([
       {
         msg: "'[object Object]' is not a string",
-        path: "images[0]",
+        path: ["images", 0],
         type: "val-start",
       },
     ]);
@@ -55,7 +55,7 @@ describe("validateFile()", () => {
     expect(validateFile(fpath).errors).toStrictEqual([
       {
         msg: "Unable to determine expected structure for file",
-        path: "",
+        path: [],
         type: "meta",
       },
     ]);
@@ -69,8 +69,8 @@ describe("validateFile()", () => {
     expect(
       validateFile(path.join(fixtureDir, "config/snake.invalid.yaml")).errors
     ).toStrictEqual([
-      { msg: "missing key 'url'", path: "images[0]", type: "val-end" },
-      { msg: "extra key", path: "images[0].uri", type: "key" },
+      { msg: "missing key 'url'", path: ["images", 0], type: "val-end" },
+      { msg: "extra key", path: ["images", 0, "uri"], type: "key" },
     ]);
   });
 

@@ -69,17 +69,17 @@ export function validateFile(
   customTypes?: TypeDefs
 ): { errors: ValidationError[]; map?: RangeMap } {
   if (!fs.existsSync(filepath)) {
-    return { errors: [{ msg: "File does not exist", path: "", type: "meta" }] };
+    return { errors: [{ msg: "File does not exist", path: [], type: "meta" }] };
   }
   if (!fs.statSync(filepath).isFile()) {
-    return { errors: [{ msg: "Not a file", path: "", type: "meta" }] };
+    return { errors: [{ msg: "Not a file", path: [], type: "meta" }] };
   }
 
   if (!structure) {
     const struct = structureFor(filepath);
     if (!struct) {
       const msg = "Unable to determine expected structure for file";
-      return { errors: [{ msg, path: "", type: "meta" }] };
+      return { errors: [{ msg, path: [], type: "meta" }] };
     }
     structure = struct;
   }

@@ -117,7 +117,9 @@ function processPath(p: string, forceRecursion: boolean = false): boolean {
   );
   for (const err of errors) {
     let msg = err.msg;
-    if (err.path) msg += ` (${err.path})`;
+    if (err.path.length > 0) {
+      msg += ` (${err.path.join(".")})`;
+    }
     logger.error(msg, { prefix: "  " });
   }
 
