@@ -8,7 +8,8 @@ const errorPrefix = `[${chalk.red("error")}]`;
 
 describe("cli", () => {
   const configPath = "test/fixtures/config";
-  const snakePath = path.join(cwd, configPath, "snake.invalid.yaml");
+  const cpath = (p: string) => path.join(cwd, configPath, p);
+  const snakePath = cpath("snake.invalid.yaml");
 
   function run(args: string[], cd?: string) {
     try {
@@ -56,11 +57,7 @@ describe("cli", () => {
   });
 
   it("should recurse when specified", () => {
-    const spanishPath = path.join(
-      cwd,
-      configPath,
-      "greetings/spanish.invalid.yaml"
-    );
+    const spanishPath = cpath("greetings/spanish.invalid.yaml");
     expect(() => run(["-r", configPath])).toThrow(
       [
         `${errorPrefix} Found 1 error in file '${spanishPath}':`,
