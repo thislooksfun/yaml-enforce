@@ -43,6 +43,7 @@ export function filePosForErr(err: ValidationError, map: RangeMap): Location {
 
   for (const key of err.path) {
     if (!range.contents) break;
+    if (!(key in range.contents)) break;
     range = range.contents[key];
   }
 
