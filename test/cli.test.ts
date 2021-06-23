@@ -1,7 +1,10 @@
 import { execSync } from "child_process";
+import chalk from "chalk";
 import path from "path";
 
 const cwd = process.cwd();
+
+const errorPrefix = `[${chalk.red("error")}]`;
 
 describe("cli", () => {
   const configPath = "test/fixtures/config";
@@ -9,7 +12,8 @@ describe("cli", () => {
 
   function run(args: string[], cd?: string) {
     try {
-      let cmd = `CI=true node dist/cli/index.js ${args.join(" ")}`;
+      const vars = "CI=true FORCE_COLOR=1";
+      let cmd = `${vars} node dist/cli/index.js ${args.join(" ")}`;
       if (cd) cmd = `(cd ${cd} && ${cmd})`;
       return execSync(cmd, { encoding: "utf-8", stdio: "pipe" });
     } catch (e) {
@@ -32,9 +36,9 @@ describe("cli", () => {
     const filePath = "test/fixtures/config/snake.invalid.yaml";
     expect(() => run([filePath])).toThrow(
       [
-        `[error] Found 2 errors in file '${snakePath}':`,
-        "[error]   missing key (images[0].url)",
-        "[error]   extra key (images[0].uri)",
+        `${errorPrefix} Found 2 errors in file '${snakePath}':`,
+        `${errorPrefix}   missing key (images[0].url)`,
+        `${errorPrefix}   extra key (images[0].uri)`,
         "",
       ].join("\n")
     );
@@ -43,9 +47,9 @@ describe("cli", () => {
   it("should not recurse by default", () => {
     expect(() => run([configPath])).toThrow(
       [
-        `[error] Found 2 errors in file '${snakePath}':`,
-        "[error]   missing key (images[0].url)",
-        "[error]   extra key (images[0].uri)",
+        `${errorPrefix} Found 2 errors in file '${snakePath}':`,
+        `${errorPrefix}   missing key (images[0].url)`,
+        `${errorPrefix}   extra key (images[0].uri)`,
         "",
       ].join("\n")
     );
@@ -59,11 +63,11 @@ describe("cli", () => {
     );
     expect(() => run(["-r", configPath])).toThrow(
       [
-        `[error] Found 1 error in file '${spanishPath}':`,
-        "[error]   missing key (title)",
-        `[error] Found 2 errors in file '${snakePath}':`,
-        "[error]   missing key (images[0].url)",
-        "[error]   extra key (images[0].uri)",
+        `${errorPrefix} Found 1 error in file '${spanishPath}':`,
+        `${errorPrefix}   missing key (title)`,
+        `${errorPrefix} Found 2 errors in file '${snakePath}':`,
+        `${errorPrefix}   missing key (images[0].url)`,
+        `${errorPrefix}   extra key (images[0].uri)`,
         "",
       ].join("\n")
     );
@@ -79,8 +83,8 @@ describe("cli", () => {
       run(["-r", "-s", '"{\\"name\\": \\"string\\"}"', filePath])
     ).toThrow(
       [
-        `[error] Found 1 error in file '${snakePath}':`,
-        "[error]   extra key (images)",
+        `${errorPrefix} Found 1 error in file '${snakePath}':`,
+        `${errorPrefix}   extra key (images)`,
         "",
       ].join("\n")
     );
