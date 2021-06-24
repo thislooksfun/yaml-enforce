@@ -122,7 +122,9 @@ function mapNode(n: AnyNode, lc: LineCounter, am: AnchorMap = {}): RangeMap {
 
     if (isAlias(node)) {
       const otherNode = anchorMap[node.source];
-      current.references = mapNode(otherNode, lc, anchorMap);
+      if (otherNode != null) {
+        current.references = mapNode(otherNode, lc, anchorMap);
+      }
     }
   });
 
