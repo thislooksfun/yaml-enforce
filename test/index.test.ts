@@ -5,9 +5,9 @@ import path from "path";
 
 const fixtureDir = path.resolve(__dirname, "./fixtures");
 
-import { filePosForErr, validateYaml, validateFile } from "../src";
+import { mapErrLocs, validateYaml, validateFile } from "../src";
 
-describe("filePosForErr()", () => {
+describe("mapErrLocs()", () => {
   const fcInt = () => fc.integer();
   const fcLoc = () => fc.record<Location>({ line: fcInt(), col: fcInt() });
   const fcRange = () => fc.record<Range>({ start: fcLoc(), end: fcLoc() });
@@ -18,7 +18,7 @@ describe("filePosForErr()", () => {
         fc.property(fcRange(), valueRange => {
           const err: ValidationError = { msg: "", type: "", path: [] };
           const map: RangeMap = { valueRange };
-          expect(filePosForErr(err, map)).toStrictEqual(valueRange.start);
+          expect(mapErrLocs(err, map)).toStrictEqual([valueRange.start]);
         })
       );
     });
@@ -28,7 +28,7 @@ describe("filePosForErr()", () => {
         fc.property(fcRange(), valueRange => {
           const err: ValidationError = { msg: "", type: "val-end", path: [] };
           const map: RangeMap = { valueRange };
-          expect(filePosForErr(err, map)).toStrictEqual(valueRange.end);
+          expect(mapErrLocs(err, map)).toStrictEqual([valueRange.end]);
         })
       );
     });
@@ -38,7 +38,7 @@ describe("filePosForErr()", () => {
         fc.property(fcRange(), fcRange(), (valueRange, keyRange) => {
           const err: ValidationError = { msg: "", type: "key", path: [] };
           const map: RangeMap = { valueRange, keyRange };
-          expect(filePosForErr(err, map)).toStrictEqual(keyRange.start);
+          expect(mapErrLocs(err, map)).toStrictEqual([keyRange.start]);
         })
       );
     });
@@ -48,7 +48,7 @@ describe("filePosForErr()", () => {
         fc.property(fcRange(), valueRange => {
           const err: ValidationError = { msg: "", type: "key", path: [] };
           const map: RangeMap = { valueRange };
-          expect(filePosForErr(err, map)).toStrictEqual(valueRange.start);
+          expect(mapErrLocs(err, map)).toStrictEqual([valueRange.start]);
         })
       );
     });
@@ -69,7 +69,7 @@ describe("filePosForErr()", () => {
             map = { valueRange: vr1, contents: { [err.path[i]]: map } };
           }
 
-          expect(filePosForErr(err, map)).toStrictEqual(vr2.start);
+          expect(mapErrLocs(err, map)).toStrictEqual([vr2.start]);
         })
       );
     });
@@ -88,7 +88,7 @@ describe("filePosForErr()", () => {
             map = { valueRange: vr1, contents: { [err.path[i]]: map } };
           }
 
-          expect(filePosForErr(err, map)).toStrictEqual(vr2.start);
+          expect(mapErrLocs(err, map)).toStrictEqual([vr2.start]);
         })
       );
 
@@ -109,8 +109,53 @@ describe("filePosForErr()", () => {
             }
           }
 
-          expect(filePosForErr(err, map)).toStrictEqual(vr2.start);
+          expect(mapErrLocs(err, map)).toStrictEqual([vr2.start]);
         })
+      );
+    });
+
+    it("should follow references", () => {
+      fc.assert(
+        fc.property(
+          fcRange(),
+          fcRange(),
+          fcRange(),
+          fcRange(),
+          fcRange(),
+          (vr1, vr2, vr3, vr4, vr5) => {
+            const err: ValidationError = {
+              msg: "",
+              type: "",
+              path: ["hello", "world"],
+            };
+
+            const map: RangeMap = {
+              valueRange: vr1,
+              contents: {
+                hello: {
+                  valueRange: vr2,
+                  references: {
+                    valueRange: vr3,
+                    contents: {
+                      world: {
+                        valueRange: vr4,
+                        references: {
+                          valueRange: vr5,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            };
+
+            expect(mapErrLocs(err, map)).toStrictEqual([
+              vr5.start,
+              vr4.start,
+              vr2.start,
+            ]);
+          }
+        )
       );
     });
   });

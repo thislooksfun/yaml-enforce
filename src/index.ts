@@ -30,6 +30,43 @@ function structureFor(file: string): Structure | null {
   return null;
 }
 
+function rangesForKeypath(
+  path: (string | number)[],
+  map: RangeMap
+): RangeMap[] {
+  let ranges: RangeMap[] = [];
+  let range = map;
+
+  for (const key of path) {
+    while (range.references) {
+      ranges.unshift(range);
+      range = range.references;
+    }
+
+    if (!range.contents) break;
+    if (!(key in range.contents)) break;
+    range = range.contents[key];
+  }
+
+  while (range.references) {
+    ranges.unshift(range);
+    range = range.references;
+  }
+
+  ranges.unshift(range);
+  return ranges;
+}
+
+function filePosForType(type: string, range: RangeMap): Location {
+  if (type === "key" && range.keyRange) {
+    return range.keyRange?.start;
+  } else if (type === "val-end") {
+    return range.valueRange.end;
+  } else {
+    return range.valueRange.start;
+  }
+}
+
 /**
  * Get the location of an error message in the source file.
  *
@@ -38,22 +75,13 @@ function structureFor(file: string): Structure | null {
  *
  * @returns The Location of the error.
  */
-export function filePosForErr(err: ValidationError, map: RangeMap): Location {
-  let range = map;
+export function mapErrLocs(err: ValidationError, map: RangeMap): Location[] {
+  const [range, ...via] = rangesForKeypath(err.path, map);
 
-  for (const key of err.path) {
-    if (!range.contents) break;
-    if (!(key in range.contents)) break;
-    range = range.contents[key];
-  }
+  const loc = filePosForType(err.type, range);
+  const viaLocs = via.map(r => filePosForType("val-start", r));
 
-  if (err.type === "key" && range.keyRange) {
-    return range.keyRange?.start;
-  } else if (err.type === "val-end") {
-    return range.valueRange.end;
-  } else {
-    return range.valueRange.start;
-  }
+  return [loc, ...viaLocs];
 }
 
 /**

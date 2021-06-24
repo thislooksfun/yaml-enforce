@@ -93,7 +93,7 @@ describe("cli", () => {
     expect(() => run([referencePath])).toThrow(
       [
         `${errorPrefix} Found 1 error in file '${referencePath}':`,
-        `${errorPrefix}   'world' is not an integer (b.hello.there) [L4:4]`,
+        `${errorPrefix}   'world' is not an integer (c.hello.there) [L3:12 via L5:10 via L6:4]`,
         "",
       ].join("\n")
     );

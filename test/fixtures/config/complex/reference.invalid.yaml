@@ -1,4 +1,6 @@
-a: &h
-  hello:
+a:
+  hello: &h
     there: world
-b: *h
+b: &r
+  hello: *h
+c: *r
