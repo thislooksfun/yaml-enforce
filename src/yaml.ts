@@ -57,10 +57,11 @@ function findInSeq(node: AnyNode, seq: YAMLSeq): number {
   return -1;
 }
 
-function mapNode(n: AnyNode, lc: LineCounter): RangeMap {
+type AnchorMap = { [key: string]: AnyNode };
+function mapNode(n: AnyNode, lc: LineCounter, am: AnchorMap = {}): RangeMap {
   const map: RangeMap = { valueRange: rangeOf(n, lc)!.value };
 
-  const anchorMap: { [key: string]: AnyNode } = {};
+  const anchorMap: AnchorMap = am;
 
   visit(n, (key, node: any, path) => {
     if (node.anchor) {
@@ -121,7 +122,7 @@ function mapNode(n: AnyNode, lc: LineCounter): RangeMap {
 
     if (isAlias(node)) {
       const otherNode = anchorMap[node.source];
-      current.references = mapNode(otherNode, lc);
+      current.references = mapNode(otherNode, lc, anchorMap);
     }
   });
 
