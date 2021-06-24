@@ -122,11 +122,6 @@ function mapNode(n: AnyNode, lc: LineCounter): RangeMap {
     if (isAlias(node)) {
       const otherNode = anchorMap[node.source];
       current.references = mapNode(otherNode, lc);
-      // We can't just assign `current = otherMap` because we want to mutate the
-      // underlying data structure.
-      // current.valueRange = otherMap.valueRange;
-      // current.keyRange = otherMap.keyRange;
-      // current.contents = otherMap.contents;
     }
   });
 
