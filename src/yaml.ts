@@ -99,9 +99,7 @@ function mapNode(n: AnyNode, lc: LineCounter): RangeMap {
         if (range) next(index, range);
       }
 
-      if (isAlias(el)) {
-        console.log(":(");
-      } else if (isSeq(el)) {
+      if (isSeq(el)) {
         inSeq = true;
       } else if (isPair(el)) {
         // Lots of assumptions on this line. There's a good chance this will
