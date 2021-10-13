@@ -38,7 +38,6 @@
     "@types/jest": "^26.0.23",
     "@types/js-yaml": "^4.0.1",
     "@types/wcwidth": "^1.0.0",
-    "codecov": "^3.8.2",
     "del-cli": "^4.0.0",
     "fast-check": "^2.17.0",
     "husky": "^6.0.0",
